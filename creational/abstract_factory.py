@@ -4,91 +4,112 @@
 # http://ginstrom.com/scribbles/2007/10/08/design-patterns-python-style/
 
 """Implementation of the abstract factory pattern"""
-
+import abc
 import random
 
 
-class PetShop(object):
+class Solider(object):
 
-    """A pet shop"""
+    def __init__(self, gun, buttle):
+        self.gun = gun
+        self.buttle = buttle
 
-    def __init__(self, animal_factory=None):
-        """pet_factory is our abstract factory.  We can set it at will."""
-
-        self.pet_factory = animal_factory
-
-    def show_pet(self):
-        """Creates and shows a pet using the abstract factory"""
-
-        pet = self.pet_factory.get_pet()
-        print("We have a lovely {}".format(pet))
-        print("It says {}".format(pet.speak()))
-        print("We also have {}".format(self.pet_factory.get_food()))
+    def fire(self):
+        self.gun.pong()
+        self.buttle.pa()
 
 
-# Stuff that our factory makes
+class Gunfactory(object):
+    __metaclass__ = abc.ABCMeta
 
-class Dog(object):
+    @abc.abstractmethod
+    def get_gun(self):
+        pass
 
-    def speak(self):
-        return "woof"
-
-    def __str__(self):
-        return "Dog"
-
-
-class Cat(object):
-
-    def speak(self):
-        return "meow"
-
-    def __str__(self):
-        return "Cat"
+    @abc.abstractmethod
+    def get_bullet(self):
+        pass
 
 
-# Factory classes
+class Gun(object):
+    __metaclass__ = abc.ABCMeta
 
-class DogFactory(object):
-
-    def get_pet(self):
-        return Dog()
-
-    def get_food(self):
-        return "dog food"
+    @abc.abstractmethod
+    def pong(self):
+        pass
 
 
-class CatFactory(object):
+class Bullet(object):
+    __metaclass__ = abc.ABCMeta
 
-    def get_pet(self):
-        return Cat()
-
-    def get_food(self):
-        return "cat food"
-
-
-# Create the proper family
-def get_factory():
-    """Let's be dynamic!"""
-    return random.choice([DogFactory, CatFactory])()
+    @abc.abstractmethod
+    def pa(self):
+        pass
 
 
-# Show pets with various factories
+class Rifle(Gun):
+
+    def pong(self):
+        print "Rifle fire,pong!"
+
+
+class Handgun(Gun):
+
+    def pong(self):
+        print "Handgun fire,pong,pong,pong"
+
+
+class RifleBullet(Bullet):
+
+    def pa(self):
+        print "Rifle buttle,pa!"
+
+
+class HandgunBullet(Bullet):
+
+    def pa(self):
+        print "Handgun buttle,pa,pa,pa"
+
+
+class RifleFactory(Gunfactory):
+
+    def get_gun(self):
+        return Rifle()
+
+    def get_bullet(self):
+        return RifleBullet()
+
+
+class HandgunFactory(object):
+
+    def get_gun(self):
+        return Handgun()
+
+    def get_bullet(self):
+        return HandgunBullet()
+
 if __name__ == "__main__":
-    for i in range(3):
-        shop = PetShop(get_factory())
-        shop.show_pet()
+    rifle_factory = RifleFactory()
+    handgun_factory = HandgunFactory()
+    factories = [rifle_factory, handgun_factory]
+    for i in range(4):
+        factory = random.choice(factories)
+        gun = factory.get_gun()
+        bullet = factory.get_bullet()
+        solider = Solider(gun, bullet)
+        solider.fire()
         print("=" * 20)
 
 ### OUTPUT ###
-# We have a lovely Dog
-# It says woof
-# We also have dog food
+# Rifle fire,pong!
+# Rifle buttle,pa!
 # ====================
-# We have a lovely Dog
-# It says woof
-# We also have dog food
+# Handgun fire,pong,pong,pong
+# Handgun buttle,pa,pa,pa
 # ====================
-# We have a lovely Cat
-# It says meow
-# We also have cat food
+# Handgun fire,pong,pong,pong
+# Handgun buttle,pa,pa,pa
+# ====================
+# Rifle fire,pong!
+# Rifle buttle,pa!
 # ====================
